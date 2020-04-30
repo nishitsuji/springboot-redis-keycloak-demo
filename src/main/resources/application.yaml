@@ -1,0 +1,16 @@
+keycloak:
+  auth-server-url: http://localhost:58080/auth
+  realm: demo
+  resource: spring-boot-sample
+  public-client: true
+  #credentials:
+  #  secret: 50c39441-e45d-46da-9069-2f04c3c0d3fa
+spring:
+  session:
+    store-type: redis
+  redis:
+    host: localhost
+    port: 56379
+server:
+  port: 58000
+
