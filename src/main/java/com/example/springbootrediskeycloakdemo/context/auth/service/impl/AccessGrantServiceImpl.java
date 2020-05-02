@@ -81,12 +81,17 @@ public class AccessGrantServiceImpl implements AccessGrantService {
 
   @SneakyThrows
   @Override
-  public void entryKeycloakAccountForRedis(final SimpleKeycloakAccount account, final AuthInfo authInfo) {
+  public void entryKeycloakAccountForRedis(
+      final SimpleKeycloakAccount account, final AuthInfo authInfo) {
     final String redisKey = account.getPrincipal().toString();
     final RefreshableKeycloakSecurityContext context = account.getKeycloakSecurityContext();
     final var redisData =
         new AuthorityInfo(
-            context.getTokenString(), context.getRefreshToken(), context.getIdTokenString());
+            authInfo.getPrincipal(),
+            authInfo.getCredentials(),
+            context.getTokenString(),
+            context.getRefreshToken(),
+            context.getIdTokenString());
     redisTemplate.delete(redisKey);
 
     final var json = JsonUtils.encode(redisData);
@@ -98,7 +103,8 @@ public class AccessGrantServiceImpl implements AccessGrantService {
 
   @SneakyThrows
   @Override
-  public Authentication redisAuthorization(final String tokenString) {
+  public Authentication redisAuthorization(
+      final KeycloakDeployment keycloakDeployment, final String tokenString) {
 
     final AccessToken accessToken = TokenVerifier.create(tokenString, AccessToken.class).getToken();
 
@@ -107,8 +113,35 @@ public class AccessGrantServiceImpl implements AccessGrantService {
     final String redisResult = redisTemplate.opsForValue().get(redisKey);
     if (StringUtils.isEmpty(redisResult)) return null;
 
+    final String decryptString =
+        CipherUtils.decrypt(
+            redisResult, encryptionKey, encryptionKey, AlgorithmCode.AES_CBC_PKCS5PADDING);
+
     final AuthorityInfo redisData =
-        JsonUtils.decodeToObject(redisResult, new TypeReference<AuthorityInfo>() {});
-    return null;
+        JsonUtils.decodeToObject(decryptString, new TypeReference<AuthorityInfo>() {});
+
+    final RefreshableKeycloakSecurityContext refreshableKeycloakSecurityContext;
+    final Collection<? extends GrantedAuthority> authorities;
+    final KeycloakAuthenticationToken token;
+    try {
+      refreshableKeycloakSecurityContext =
+          createKeycloakSecurityContext(
+              keycloakDeployment,
+              redisData.getTokenString(),
+              redisData.getIdTokenString(),
+              redisData.getRefreshToken());
+      authorities =
+          createGrantedAuthorities(refreshableKeycloakSecurityContext, grantedAuthoritiesMapper);
+      token =
+          new KeycloakAuthenticationToken(
+              createAccount(keycloakDeployment, refreshableKeycloakSecurityContext),
+              false,
+              authorities);
+    } catch (final VerificationException e) {
+      throw new BadCredentialsException("Unable to validate token", e);
+    } catch (final Exception e) {
+      throw new AuthenticationServiceException("Error authenticating with Keycloak server", e);
+    }
+    return token;
   }
 }

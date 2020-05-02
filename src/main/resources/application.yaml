@@ -1,16 +1,30 @@
 keycloak:
-  auth-server-url: http://localhost:58080/auth
-  realm: demo
-  resource: spring-boot-sample
-  public-client: true
-  #credentials:
-  #  secret: 50c39441-e45d-46da-9069-2f04c3c0d3fa
+  auth-server-url: http://${KEYCLOAK_CLUSTER_ENDPOINT:localhost}:${KEYCLOAK_CLUSTER_PORT:8081}/auth #http://<host>:<port>/auth
+  realm: ${KEYCLOAK_REALM:realm_name} #<realm_name>
+  resource: .well-known
 spring:
+  devtools:
+    livereload:
+      enabled: true
+  profiles:
+    active: develop
   session:
-    store-type: redis
+    store-type: NONE
   redis:
-    host: localhost
-    port: 56379
+    host: ${REDIS_CLUSTER_ENDPOINT:localhost} #<host>
+    port: ${REDIS_CLUSTER_PORT:6379} # <port>
+    password: ${REDIS_CLUSTER_TOKEN} #<password>
 server:
-  port: 58000
-
+  port: ${SPRING_BOOT_PORT:8080} #<port>
+logging:
+  encoder:
+    charset: UTF-8
+  level:
+    root: ERROR
+    org:
+      springframework:
+        web: DEBUG
+      keycloak: DEBUG
+      apache:
+        tomcat: INFO
+        coyote: INFO

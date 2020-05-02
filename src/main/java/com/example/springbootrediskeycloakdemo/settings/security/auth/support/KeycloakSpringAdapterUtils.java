@@ -1,5 +1,6 @@
 package com.example.springbootrediskeycloakdemo.settings.security.auth.support;
 
+import com.example.springbootrediskeycloakdemo.settings.security.auth.wapper.RefreshableKeycloakSecurityContextWrapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,15 +27,23 @@ import org.springframework.util.StringUtils;
 
 public class KeycloakSpringAdapterUtils {
 
-  public static RefreshableKeycloakSecurityContext createKeycloakSecurityContext(
+  public static RefreshableKeycloakSecurityContextWrapper createKeycloakSecurityContext(
       KeycloakDeployment deployment, AccessTokenResponse accessTokenResponse)
       throws VerificationException {
+
     String tokenString = accessTokenResponse.getToken();
     String idTokenString = accessTokenResponse.getIdToken();
+    return createKeycloakSecurityContext(
+        deployment, tokenString, idTokenString, accessTokenResponse.getRefreshToken());
+  }
+
+  public static RefreshableKeycloakSecurityContextWrapper createKeycloakSecurityContext(
+      KeycloakDeployment deployment, String tokenString, String idTokenString, String refreshToken)
+      throws VerificationException {
     AccessToken accessToken = TokenVerifier.create(tokenString, AccessToken.class).getToken();
     IDToken idToken = null;
 
-    if(!StringUtils.isEmpty(idTokenString)) {
+    if (!StringUtils.isEmpty(idTokenString)) {
       try {
         JWSInput input = new JWSInput(idTokenString);
         idToken = input.readJsonContent(IDToken.class);
@@ -43,14 +52,8 @@ public class KeycloakSpringAdapterUtils {
       }
     }
 
-    return new RefreshableKeycloakSecurityContext(
-        deployment,
-        null,
-        tokenString,
-        accessToken,
-        idTokenString,
-        idToken,
-        accessTokenResponse.getRefreshToken());
+    return new RefreshableKeycloakSecurityContextWrapper(
+        deployment, null, tokenString, accessToken, idTokenString, idToken, refreshToken);
   }
 
   public static Collection<? extends GrantedAuthority> createGrantedAuthorities(

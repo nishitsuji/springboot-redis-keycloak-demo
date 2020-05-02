@@ -45,9 +45,6 @@ public class WebSecurityConfiguration extends KeycloakWebSecurityConfigurerAdapt
         .disable()
         .formLogin()
         .disable()
-//        .addFilterAfter(
-//            keycloakAuthenticationProcessingFilter(), AnonymousAuthenticationProcessingFilter.class)
-        //        .addFilterBefore(new
         .authorizeRequests()
         .anyRequest()
         .permitAll();

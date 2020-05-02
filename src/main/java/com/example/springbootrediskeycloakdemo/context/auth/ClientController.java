@@ -55,10 +55,7 @@ public class ClientController {
     }
 
     if (ObjectUtils.notEqual(ANONYMOUS, auth.getPrincipal())) {
-      final Authentication authentication =
-          accessGrantService.redisAuthorization(TokenExtractor.extract(request));
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-      final SimpleKeycloakAccount account = simpleKeycloakAccount(authentication);
+      final SimpleKeycloakAccount account = simpleKeycloakAccount(auth);
       // 認可済み
       return new HashMap<String, String>() {
         {

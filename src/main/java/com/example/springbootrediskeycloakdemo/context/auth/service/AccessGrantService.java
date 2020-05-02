@@ -13,5 +13,5 @@ public interface AccessGrantService {
 
   void entryKeycloakAccountForRedis(SimpleKeycloakAccount account, AuthInfo authInfo);
 
-  Authentication redisAuthorization(String tokenString);
+  Authentication redisAuthorization(KeycloakDeployment keycloakDeployment, String tokenString);
 }

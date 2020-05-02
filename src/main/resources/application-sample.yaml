@@ -1,0 +1,29 @@
+# https://keycloak-documentation.openstandia.jp/master/ja_JP/securing_apps/index.html
+keycloak:
+  auth-server-url: http://localhost:58080/auth
+  realm: <reaml name>
+  resource: <null にすると例外出るので、何か入れる。基本は「client_id」 不要なら適当な文字列(.well-known など) >
+  public-client: true
+  credentials:
+    secret: <local開発や固定の開発なら設定ファイルにハッシュコードを持たせるのもあり。>
+# https://spring.pleiades.io/spring-boot/docs/current/reference/html/appendix-application-properties.html
+spring:
+  session:
+    store-type: redis
+  redis:
+    host: #<redisのホスト>
+    port: #<redisのポート>
+server:
+  port: #<SpringBoot 起動時のポート>
+logging:
+  encoder:
+    charset: UTF-8
+  level:
+    root: ERROR
+    org:
+      springframework:
+        web: DEBUG
+      keycloak: DEBUG
+      apache:
+        tomcat: INFO
+        coyote: INFO

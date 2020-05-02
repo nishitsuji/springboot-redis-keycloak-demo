@@ -1,23 +1,31 @@
 package com.example.springbootrediskeycloakdemo.settings.security.auth.filter;
 
+import com.example.springbootrediskeycloakdemo.context.auth.service.AccessGrantService;
+import com.example.springbootrediskeycloakdemo.settings.security.auth.extractor.TokenExtractor;
 import java.io.IOException;
+import java.util.Objects;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.ObjectUtils;
 import org.keycloak.adapters.AdapterDeploymentContext;
+import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.spi.HttpFacade;
 import org.keycloak.adapters.springsecurity.facade.SimpleHttpFacade;
 import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 /** Token認証を行うフィルター */
 public class AuthenticationProcessingFilter extends KeycloakAuthenticationProcessingFilter {
+
+  @Autowired private AccessGrantService accessGrantService;
 
   /**
    * Creates a new Keycloak authentication processing filter with given {@link
@@ -47,7 +55,14 @@ public class AuthenticationProcessingFilter extends KeycloakAuthenticationProces
       throws AuthenticationException, IOException, ServletException {
 
     // 本来ならここに認可処理を書くべき
-    return null;
+    final HttpFacade facade = new SimpleHttpFacade(request, response);
+    final KeycloakDeployment deployment = context.resolveDeployment(facade);
+    if (Objects.isNull(deployment)) return null;
+
+      final Authentication authentication =
+          accessGrantService.redisAuthorization(deployment, TokenExtractor.extract(request));
+
+      return authentication;
   }
 
   @Override

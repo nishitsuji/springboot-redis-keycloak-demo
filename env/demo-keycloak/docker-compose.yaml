@@ -5,20 +5,20 @@ services:
     restart: always
     container_name: demo.keycloak
     ports:
-      - 58080:8080
+      - 8080:8080
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
       - PROXY_ADDRESS_FORWARDING=true
-      - KEYCLOAK_IMPORT=/tmp/
+      - KEYCLOAK_IMPORT=/tmp/testrealm.json
     volumes:
-      - ./data/keycloak/testrealm.json:/tmp/testrealm.json
+      - ./env/keycloak/testrealm.json:/tmp/testrealm.json
 
   redis:
     image: redis:latest
     restart: always
     container_name: demo.redis
     ports:
-      - 56379:6379
+      - 6379:6379
     volumes:
-      - ./data/reis:/data
+      - ./docker/redis:/data
