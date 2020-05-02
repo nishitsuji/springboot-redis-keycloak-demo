@@ -3,6 +3,7 @@ package com.example.springbootrediskeycloakdemo.context.auth;
 import com.example.springbootrediskeycloakdemo.context.auth.model.AuthInfo;
 import com.example.springbootrediskeycloakdemo.context.auth.service.AccessGrantService;
 import com.example.springbootrediskeycloakdemo.settings.security.auth.extractor.AuthInfoExtractor;
+import com.example.springbootrediskeycloakdemo.settings.security.auth.extractor.TokenExtractor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -50,14 +51,18 @@ public class ClientController {
     }
 
     if (Objects.isNull(auth)) {
-      throw new AuthenticationServiceException(
-          "Authentication is null");
+      throw new AuthenticationServiceException("Authentication is null");
     }
 
     if (ObjectUtils.notEqual(ANONYMOUS, auth.getPrincipal())) {
+      final Authentication authentication =
+          accessGrantService.redisAuthorization(TokenExtractor.extract(request));
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      final SimpleKeycloakAccount account = simpleKeycloakAccount(authentication);
+      // 認可済み
       return new HashMap<String, String>() {
         {
-          put("token", "認証済みのtoken");
+          put("token", account.getKeycloakSecurityContext().getTokenString());
         }
       };
     }
@@ -71,10 +76,9 @@ public class ClientController {
 
     final AuthInfo authInfo = authInfoOpt.get();
 
-    Authentication authentication = accessGrantService.login(deployment, authInfo);
-
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    SimpleKeycloakAccount account = (SimpleKeycloakAccount) authentication.getDetails();
+    final Authentication authentication = accessGrantService.login(deployment, authInfo);
+    final SimpleKeycloakAccount account = simpleKeycloakAccount(authentication);
+    accessGrantService.entryKeycloakAccountForRedis(account, authInfo);
 
     // JWT Tokenを返却する
     return new HashMap<String, String>() {
@@ -82,5 +86,10 @@ public class ClientController {
         put("token", account.getKeycloakSecurityContext().getTokenString());
       }
     };
+  }
+
+  private SimpleKeycloakAccount simpleKeycloakAccount(final Authentication authentication) {
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    return (SimpleKeycloakAccount) authentication.getDetails();
   }
 }

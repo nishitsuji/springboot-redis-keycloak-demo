@@ -13,7 +13,6 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 
 /**
  * 匿名認証を行うフィルター
- * TODO:これ使って初回認証したいけどうまくいかないので残骸だけ残す
  * @deprecated
  */
 public class AnonymousAuthenticationProcessingFilter extends AnonymousAuthenticationFilter {

@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.keycloak.adapters.AdapterDeploymentContext;
+import org.keycloak.adapters.spi.HttpFacade;
+import org.keycloak.adapters.springsecurity.facade.SimpleHttpFacade;
 import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,7 @@ public class AuthenticationProcessingFilter extends KeycloakAuthenticationProces
       final HttpServletRequest request, final HttpServletResponse response)
       throws AuthenticationException, IOException, ServletException {
 
+    // 本来ならここに認可処理を書くべき
     return null;
   }
 
@@ -54,34 +57,6 @@ public class AuthenticationProcessingFilter extends KeycloakAuthenticationProces
       final FilterChain chain,
       final Authentication authResult)
       throws IOException, ServletException {
-
-    //    if (authResult instanceof KeycloakAuthenticationToken
-    //        && ((KeycloakAuthenticationToken) authResult).isInteractive()) {
-    //      super.successfulAuthentication(request, response, chain, authResult);
-    //      return;
-    //    }
-    //
-    //    if (log.isDebugEnabled()) {
-    //      log.debug(
-    //          "Authentication success using bearer token/basic authentication. Updating
-    // SecurityContextHolder to contain: {}",
-    //          authResult);
-    //    }
-    //
-    //    SecurityContext context = SecurityContextHolder.createEmptyContext();
-    //    context.setAuthentication(authResult);
-    //    SecurityContextHolder.setContext(context);
-    //
-    //    try {
-    //      // Fire event
-    //      if (this.eventPublisher != null) {
-    //        eventPublisher.publishEvent(
-    //            new InteractiveAuthenticationSuccessEvent(authResult, this.getClass()));
-    //      }
-    //      chain.doFilter(request, response);
-    //    } finally {
-    //      SecurityContextHolder.clearContext();
-    //    }
   }
 
   @Override
