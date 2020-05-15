@@ -16,18 +16,18 @@ public class AuthorityInfo {
       @JsonProperty("principal") final Object principal,
       @JsonProperty("credentials") final Object credentials,
       @JsonProperty("tokenString") final String tokenString,
-      @JsonProperty("refreshToken") final String refreshToken,
+      @JsonProperty("refreshTokenString") final String refreshTokenString,
       @JsonProperty("idTokenString") final String idTokenString) {
     this.principal = principal;
     this.credentials = credentials;
     this.tokenString = tokenString;
-    this.refreshToken = refreshToken;
+    this.refreshTokenString = refreshTokenString;
     this.idTokenString = idTokenString;
   }
 
   private final Object principal;
   private Object credentials;
   private String tokenString;
-  private String refreshToken;
+  private String refreshTokenString;
   private String idTokenString;
 }

@@ -1,6 +1,9 @@
 package com.example.springbootrediskeycloakdemo.settings.security.auth.filter;
 
+import com.example.springbootrediskeycloakdemo.context.auth.model.AuthorityInfo;
+import com.example.springbootrediskeycloakdemo.context.auth.model.UserCredential;
 import com.example.springbootrediskeycloakdemo.context.auth.service.AccessGrantService;
+import com.example.springbootrediskeycloakdemo.context.auth.service.KeycloakContextService;
 import com.example.springbootrediskeycloakdemo.settings.security.auth.extractor.TokenExtractor;
 import java.io.IOException;
 import java.util.Objects;
@@ -9,11 +12,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.ObjectUtils;
 import org.keycloak.adapters.AdapterDeploymentContext;
 import org.keycloak.adapters.KeycloakDeployment;
-import org.keycloak.adapters.spi.HttpFacade;
-import org.keycloak.adapters.springsecurity.facade.SimpleHttpFacade;
 import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ import org.springframework.security.core.AuthenticationException;
 public class AuthenticationProcessingFilter extends KeycloakAuthenticationProcessingFilter {
 
   @Autowired private AccessGrantService accessGrantService;
+  @Autowired private KeycloakContextService keycloakContextService;
 
   /**
    * Creates a new Keycloak authentication processing filter with given {@link
@@ -55,14 +56,15 @@ public class AuthenticationProcessingFilter extends KeycloakAuthenticationProces
       throws AuthenticationException, IOException, ServletException {
 
     // 本来ならここに認可処理を書くべき
-    final HttpFacade facade = new SimpleHttpFacade(request, response);
-    final KeycloakDeployment deployment = context.resolveDeployment(facade);
+    final KeycloakDeployment deployment =
+        keycloakContextService.resolveDeployment(request, response, "", false);
     if (Objects.isNull(deployment)) return null;
 
-      final Authentication authentication =
-          accessGrantService.redisAuthorization(deployment, TokenExtractor.extract(request));
+    final AuthorityInfo authorityInfo =
+        accessGrantService.redisAuthorization(deployment, TokenExtractor.extract(request));
 
-      return authentication;
+    UserCredential credential = UserCredential.convertToAuthorityInfo(authorityInfo);
+    return keycloakContextService.convertUserCredential(deployment, credential);
   }
 
   @Override
@@ -71,8 +73,7 @@ public class AuthenticationProcessingFilter extends KeycloakAuthenticationProces
       final HttpServletResponse response,
       final FilterChain chain,
       final Authentication authResult)
-      throws IOException, ServletException {
-  }
+      throws IOException, ServletException {}
 
   @Override
   protected void unsuccessfulAuthentication(

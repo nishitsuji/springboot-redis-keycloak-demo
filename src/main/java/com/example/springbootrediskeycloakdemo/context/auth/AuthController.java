@@ -1,9 +1,10 @@
 package com.example.springbootrediskeycloakdemo.context.auth;
 
 import com.example.springbootrediskeycloakdemo.context.auth.model.AuthInfo;
+import com.example.springbootrediskeycloakdemo.context.auth.model.UserCredential;
 import com.example.springbootrediskeycloakdemo.context.auth.service.AccessGrantService;
+import com.example.springbootrediskeycloakdemo.context.auth.service.KeycloakContextService;
 import com.example.springbootrediskeycloakdemo.settings.security.auth.extractor.AuthInfoExtractor;
-import com.example.springbootrediskeycloakdemo.settings.security.auth.extractor.TokenExtractor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -13,11 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ObjectUtils;
-import org.keycloak.adapters.AdapterDeploymentContext;
 import org.keycloak.adapters.KeycloakDeployment;
-import org.keycloak.adapters.spi.HttpFacade;
 import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
-import org.keycloak.adapters.springsecurity.facade.SimpleHttpFacade;
+import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -28,14 +27,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "/keycloak/client")
+@RequestMapping(path = "/keycloak")
 @RequiredArgsConstructor
-public class ClientController {
+public class AuthController {
 
   private final String ANONYMOUS = "anonymousUser";
 
   private final AccessGrantService accessGrantService;
-  private final AdapterDeploymentContext context;
+  private final KeycloakContextService keycloakContextService;
 
   @SneakyThrows
   @RequestMapping(path = "/auth")
@@ -64,16 +63,18 @@ public class ClientController {
       };
     }
 
-    final HttpFacade facade = new SimpleHttpFacade(request, response);
-    final KeycloakDeployment deployment = context.resolveDeployment(facade);
-    if (Objects.isNull(deployment)) return null;
+    final KeycloakDeployment deployment =
+        keycloakContextService.resolveDeployment(request, response, "", false);
 
     final Optional<AuthInfo> authInfoOpt = Optional.ofNullable(AuthInfoExtractor.extract(request));
     if (!authInfoOpt.isPresent()) return null;
 
     final AuthInfo authInfo = authInfoOpt.get();
 
-    final Authentication authentication = accessGrantService.login(deployment, authInfo);
+    final AccessTokenResponse tokenResponse = accessGrantService.login(deployment, authInfo);
+    UserCredential credential = UserCredential.convertToTokenResponse(tokenResponse);
+    final Authentication authentication =
+        keycloakContextService.convertUserCredential(deployment, credential);
     final SimpleKeycloakAccount account = simpleKeycloakAccount(authentication);
     accessGrantService.entryKeycloakAccountForRedis(account, authInfo);
 
