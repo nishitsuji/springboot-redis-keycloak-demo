@@ -1,0 +1,30 @@
+keycloak:
+  auth-server-url: ${KEYCLOAK_CLUSTER_ENDPOINT} #http://<host>:<port>/auth
+  realm: ${KEYCLOAK_REALM:.well-known} #<realm_name>
+  resource: .well-known
+spring:
+  devtools:
+    livereload:
+      enabled: true
+  profiles:
+    active: local
+  session:
+    store-type: NONE
+  redis:
+    host: ${REDIS_CLUSTER_ENDPOINT:localhost} #<host>
+    port: ${REDIS_CLUSTER_PORT} # <port>
+    password: ${REDIS_CLUSTER_TOKEN} #<password>
+server:
+  port: ${SPRING_BOOT_PORT} #<port>
+logging:
+  encoder:
+    charset: UTF-8
+  level:
+    root: ERROR
+    org:
+      springframework:
+        web: DEBUG
+      keycloak: DEBUG
+      apache:
+        tomcat: INFO
+        coyote: INFO

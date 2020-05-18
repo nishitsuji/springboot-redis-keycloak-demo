@@ -20,5 +20,7 @@ services:
     container_name: demo.redis
     ports:
       - 6379:6379
+    # password setting
+    command: redis-server --appendonly yes --requirepass MTIxMg==
     volumes:
       - ./docker/redis:/data
