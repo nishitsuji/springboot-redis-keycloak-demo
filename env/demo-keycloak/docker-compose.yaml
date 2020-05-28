@@ -5,55 +5,56 @@ services:
     restart: always
     container_name: demo.keycloak
     ports:
-      - 8080:8080
+      - 28080:8080
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
       - PROXY_ADDRESS_FORWARDING=true
-      - DB_VENDOR=mysql
-      - DB_ADDR=mysql_host
-      - DB_PORT=3306
-      - DB_DATABASE=keycloak
-      - DB_USER=keycloak
-      - DB_PASSWORD=keycloak
-      - JDBC_PARAMS="useSSL=false"
+      #- DB_VENDOR=mysql
+      #- DB_ADDR=mysql_host
+      #- DB_PORT=23306
+      #- DB_DATABASE=keycloak
+      #- DB_USER=keycloak
+      #- DB_PASSWORD=keycloak
+      #- JDBC_PARAMS="useSSL=false"
       - KEYCLOAK_IMPORT=/tmp/testrealm.json
     volumes:
       - ./env/keycloak/testrealm.json:/tmp/testrealm.json
-      - ./env/keycloak/modules/mysql-connector-java-5.1.49-bin.jar:/opt/jboss/keycloak/modules/system/layers/keycloak/com/mysql/main/mysql-connector-java-5.1.49-bin.jar
-      - ./env/keycloak/modules/module.xml:/opt/jboss/keycloak/modules/system/layers/keycloak/com/mysql/main/module.xml
-      - ./env/keycloak/standalone.xml:/opt/jboss/keycloak/standalone/configuration/standalone.xml
-      - ./env/keycloak/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
-    depends_on:
-      - db
-      links:
-        - db
-        - db:mysql_host
-  db:
-    image: mysql:8.0
-    container_name: onyaku.local.mysql_host
-    hostname: mysql_host
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: keycloak
-      MYSQL_USER: keycloak
-      MYSQL_PASSWORD: keycloak
-      TZ: 'Asia/Tokyo'
-    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
-    volumes:
-      - ./docker/db/data:/var/lib/mysql
-      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./docker/db/sql:/docker-entrypoint-initdb.d
-    ports:
-      - 3306:3306
+      # 本来なら、ここのファイルを使ってDBを外だしするんだけど、なんか動かないのでコメントアウト。時間見て修正する（environmentでやってくれるんで。）
+      #- ./env/keycloak/modules/mysql-connector-java-5.1.49-bin.jar:/opt/jboss/keycloak/modules/system/layers/keycloak/com/mysql/main/mysql-connector-java-5.1.49-bin.jar
+      #- ./env/keycloak/modules/module.xml:/opt/jboss/keycloak/modules/system/layers/keycloak/com/mysql/main/module.xml
+      #- ./env/keycloak/modules/standalone.xml:/opt/jboss/keycloak/standalone/configuration/standalone.xml
+      #- ./env/keycloak/modules/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+#    depends_on:
+#      - db
+#    links:
+#      - db
+#      - db:mysql_host
+#  db:
+#    image: mysql:8.0
+#    container_name: demo.local.mysql_host
+#    hostname: mysql_host
+#    restart: always
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#      MYSQL_DATABASE: keycloak
+#      MYSQL_USER: keycloak
+#      MYSQL_PASSWORD: keycloak
+#      TZ: 'Asia/Tokyo'
+#    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+#    volumes:
+#      - ./docker/db/data:/var/lib/mysql
+#      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+#      - ./docker/db/sql:/docker-entrypoint-initdb.d
+#    ports:
+#      - 23306:3306
 
   redis:
     image: redis:latest
     restart: always
     container_name: demo.redis
     ports:
-      - 6379:6379
+      - 26379:6379
     # password setting
     command: redis-server --appendonly yes --requirepass MTIxMg==
     volumes:

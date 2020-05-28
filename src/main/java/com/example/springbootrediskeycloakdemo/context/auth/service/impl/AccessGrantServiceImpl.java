@@ -54,7 +54,7 @@ public class AccessGrantServiceImpl implements AccessGrantService {
       final SimpleKeycloakAccount account, final AuthInfo authInfo) {
     final String redisKey = account.getPrincipal().toString();
     final RefreshableKeycloakSecurityContext context = account.getKeycloakSecurityContext();
-    final var redisData =
+    final AuthorityInfo redisData =
         new AuthorityInfo(
             authInfo.getPrincipal(),
             authInfo.getCredentials(),
@@ -63,8 +63,8 @@ public class AccessGrantServiceImpl implements AccessGrantService {
             context.getIdTokenString());
     redisTemplate.delete(redisKey);
 
-    final var json = JsonUtils.encode(redisData);
-    final var encryptString =
+    final String json = JsonUtils.encode(redisData);
+    final String encryptString =
         CipherUtils.encrypt(json, encryptionKey, encryptionKey, AlgorithmCode.AES_CBC_PKCS5PADDING);
 
     redisTemplate.opsForValue().set(redisKey, encryptString);
@@ -86,6 +86,6 @@ public class AccessGrantServiceImpl implements AccessGrantService {
         CipherUtils.decrypt(
             redisResult, encryptionKey, encryptionKey, AlgorithmCode.AES_CBC_PKCS5PADDING);
 
-    return JsonUtils.decodeToObject(decryptString, new TypeReference<>() {});
+    return JsonUtils.decodeToObject(decryptString, new TypeReference<AuthorityInfo>() {});
   }
 }

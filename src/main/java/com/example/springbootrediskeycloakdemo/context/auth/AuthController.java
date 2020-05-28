@@ -17,6 +17,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.springsecurity.account.SimpleKeycloakAccount;
 import org.keycloak.representations.AccessTokenResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
@@ -33,8 +34,8 @@ public class AuthController {
 
   private final String ANONYMOUS = "anonymousUser";
 
-  private final AccessGrantService accessGrantService;
-  private final KeycloakContextService keycloakContextService;
+  @Autowired private AccessGrantService accessGrantService;
+  @Autowired private KeycloakContextService keycloakContextService;
 
   @SneakyThrows
   @RequestMapping(path = "/auth")

@@ -19,6 +19,7 @@ import org.keycloak.adapters.springsecurity.facade.SimpleHttpFacade;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.common.VerificationException;
 import org.keycloak.representations.adapters.config.AdapterConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -32,8 +33,8 @@ import org.springframework.util.StringUtils;
 public class KeycloakContextServiceImpl implements KeycloakContextService {
 
   private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
-  private final AdapterDeploymentContext context;
-  private final AdapterConfig adapterConfig;
+  @Autowired private AdapterDeploymentContext context;
+  @Autowired private AdapterConfig adapterConfig;
 
   @Override
   public KeycloakDeployment resolveDeployment(
