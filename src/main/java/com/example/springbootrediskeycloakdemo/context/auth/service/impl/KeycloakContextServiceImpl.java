@@ -18,6 +18,7 @@ import org.keycloak.adapters.spi.HttpFacade;
 import org.keycloak.adapters.springsecurity.facade.SimpleHttpFacade;
 import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.keycloak.common.VerificationException;
+import org.keycloak.representations.adapters.config.AdapterConfig;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -32,6 +33,7 @@ public class KeycloakContextServiceImpl implements KeycloakContextService {
 
   private GrantedAuthoritiesMapper grantedAuthoritiesMapper;
   private final AdapterDeploymentContext context;
+  private final AdapterConfig adapterConfig;
 
   @Override
   public KeycloakDeployment resolveDeployment(
@@ -47,6 +49,7 @@ public class KeycloakContextServiceImpl implements KeycloakContextService {
     if (!StringUtils.isEmpty(realmName)) deployment.setRealm(realmName);
     deployment.setDelegateBearerErrorResponseSending(true);
     deployment.setAlwaysRefreshToken(alwaysRefreshToken);
+    deployment.setAuthServerBaseUrl(adapterConfig);
     return deployment;
   }
 
