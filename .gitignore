@@ -285,8 +285,8 @@ gradle-app.setting
 HELP.md
 !**/src/main/**
 !**/src/test/**
-/env/docker/*
-!/env/demo-keycloak/env/**
+env/demo-keycloak/docker/**
+!env/demo-keycloak/env/**
 ### STS ###
 .settings
 .sts4-cache

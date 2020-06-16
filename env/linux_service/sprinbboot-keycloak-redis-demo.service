@@ -1,0 +1,17 @@
+[Unit]
+Description=springboot-redis-keycloak-demo
+
+[Service]
+ExecStart=/opt/springboot-redis-keycloak-demo/application.start.sh
+ExecStop=/opt/springboot-redis-keycloak-demo/application.stop.sh
+KillMode=none
+Restart=always
+Type=simple
+User=root
+Group=root
+SuccessExitStatus=143
+TimeoutStartSec=600
+TimeoutStopSec=600
+
+[Install]
+WantedBy=multi-user.target
